@@ -50,12 +50,12 @@ export const StripeProducts: React.FC = () => {
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Premium Products</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Enhance your marketplace experience with our premium offerings
+          Enhance your marketplace experience with our premium offerings. All prices are in Nigerian Naira (₦).
         </p>
       </div>
 
       {error && (
-            Enhance your marketplace experience with our premium offerings. All prices are in Nigerian Naira (₦).
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-600 text-sm">{error}</p>
         </div>
       )}

@@ -105,13 +105,16 @@ const AppContent: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+      console.log('Login attempt for:', formData.email);
       setLoading(true);
       setError('');
 
       try {
-        await signIn(formData.email, formData.password);
+        const result = await signIn(formData.email, formData.password);
+        console.log('Login successful:', result.user?.id);
         setState(prev => ({ ...prev, currentPage: 'home' }));
       } catch (err) {
+        console.error('Login error:', err);
         setError(err instanceof Error ? err.message : 'Login failed');
       } finally {
         setLoading(false);
@@ -205,6 +208,8 @@ const AppContent: React.FC = () => {
       setError('');
 
       try {
+        console.log('Starting registration process...');
+        console.log('Form data:', { email: formData.email, role });
         const profileData = {
           role,
           full_name: formData.full_name,
@@ -220,9 +225,13 @@ const AppContent: React.FC = () => {
           }),
         };
 
-        await signUp(formData.email, formData.password, profileData);
+        console.log('Profile data:', profileData);
+        const result = await signUp(formData.email, formData.password, profileData);
+        console.log('Registration successful');
+        console.log('Created user:', result);
         setState(prev => ({ ...prev, currentPage: 'home' }));
       } catch (err) {
+        console.error('Registration error:', err);
         setError(err instanceof Error ? err.message : 'Registration failed');
       } finally {
         setLoading(false);
@@ -605,7 +614,7 @@ const AppContent: React.FC = () => {
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
           
           <div className="flex items-center justify-between mb-3">
-            <span className="text-lg font-bold text-blue-600">₦{product.price}</span>
+            <span className="text-lg font-bold text-blue-600">₦{product.price.toLocaleString()}</span>
             <div className="flex items-center text-sm text-gray-500">
               <Star className="w-4 h-4 text-yellow-400 mr-1" />
               {product.seller?.rating || 0}
@@ -814,7 +823,7 @@ const AppContent: React.FC = () => {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-gray-900">₦{order.total_amount}</p>
+                        <p className="font-medium text-gray-900">₦{order.total_amount.toLocaleString()}</p>
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           order.status === 'delivered' ? 'bg-green-100 text-green-800' :
                           order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :

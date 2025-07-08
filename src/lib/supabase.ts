@@ -121,55 +121,130 @@ export const getCurrentUser = async () => {
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching user profile:', error);
+  try {
+    console.log('Fetching user profile for:', userId);
+    
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+    
+    console.log('User profile fetched:', data);
+    return data;
+  } catch (err) {
+    console.error('Exception fetching user profile:', err);
     return null;
   }
-  
-  return data;
 };
 
 export const signUp = async (email: string, password: string, profileData: Partial<UserProfile>) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
+  try {
+    console.log('Starting signup process for:', email);
+    console.log('Profile data to create:', profileData);
 
-  if (error) throw error;
+    // First, sign up the user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: undefined, // Disable email confirmation
+      }
+    });
 
-  if (data.user) {
-    // Create user profile
-    const { error: profileError } = await supabase
+    if (authError) {
+      console.error('Auth signup error:', authError);
+      throw authError;
+    }
+
+    if (!authData.user) {
+      throw new Error('No user returned from signup');
+    }
+
+    console.log('Auth user created:', authData.user.id);
+
+    // Wait a moment for the auth user to be fully created
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Create the user profile
+    const profileToInsert = {
+      id: authData.user.id,
+      email: authData.user.email || email,
+      ...profileData,
+    };
+
+    console.log('Inserting profile:', profileToInsert);
+
+    const { data: profileResult, error: profileError } = await supabase
       .from('user_profiles')
-      .insert({
-        id: data.user.id,
-        email,
-        ...profileData,
-      });
+      .insert(profileToInsert)
+      .select()
+      .single();
 
-    if (profileError) throw profileError;
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
+      
+      // If profile creation fails, try to clean up the auth user
+      try {
+        await supabase.auth.admin.deleteUser(authData.user.id);
+      } catch (cleanupError) {
+        console.error('Failed to cleanup auth user:', cleanupError);
+      }
+      
+      throw new Error(`Failed to create user profile: ${profileError.message}`);
+    }
+
+    console.log('Profile created successfully:', profileResult);
+    return { user: authData.user, profile: profileResult };
+
+  } catch (error) {
+    console.error('Signup process failed:', error);
+    throw error;
   }
-
-  return data;
 };
 
 export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  try {
+    console.log('Starting signin process for:', email);
 
-  if (error) throw error;
-  return data;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error('Signin error:', error);
+      throw error;
+    }
+
+    console.log('Signin successful for user:', data.user?.id);
+    return data;
+
+  } catch (error) {
+    console.error('Signin process failed:', error);
+    throw error;
+  }
 };
 
 export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  try {
+    console.log('Starting signout process');
+    
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Signout error:', error);
+      throw error;
+    }
+    
+    console.log('Signout successful');
+  } catch (error) {
+    console.error('Signout process failed:', error);
+    throw error;
+  }
 };

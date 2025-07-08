@@ -27,17 +27,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
+      console.log('Refreshing profile for user:', user.id);
       const userProfile = await getUserProfile(user.id);
       setProfile(userProfile);
+      console.log('Profile refreshed:', userProfile);
     }
   };
 
   useEffect(() => {
+    console.log('AuthProvider: Initializing auth state');
+    
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting initial session:', error);
+      }
+      
+      console.log('Initial session:', session?.user?.id || 'No session');
       setUser(session?.user ?? null);
+      
       if (session?.user) {
-        getUserProfile(session.user.id).then(setProfile);
+        getUserProfile(session.user.id).then((profile) => {
+          console.log('Initial profile loaded:', profile);
+          setProfile(profile);
+        });
       }
       setLoading(false);
     });
@@ -45,9 +58,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id || 'No user');
+        
         setUser(session?.user ?? null);
+        
         if (session?.user) {
           const userProfile = await getUserProfile(session.user.id);
+          console.log('Profile loaded after auth change:', userProfile);
           setProfile(userProfile);
         } else {
           setProfile(null);
@@ -56,13 +73,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('AuthProvider: Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
+    try {
+      console.log('AuthProvider: Signing out');
+      await supabase.auth.signOut();
+      setUser(null);
+      setProfile(null);
+      console.log('AuthProvider: Signout complete');
+    } catch (error) {
+      console.error('AuthProvider: Signout error:', error);
+    }
   };
 
   const value = {
