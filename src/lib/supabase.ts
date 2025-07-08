@@ -153,7 +153,10 @@ export const signUp = async (email: string, password: string, profileData: Parti
       email,
       password,
       options: {
-        emailRedirectTo: undefined, // Disable email confirmation
+        emailRedirectTo: undefined,
+        data: {
+          email_confirm: false
+        }
       }
     });
 
@@ -168,8 +171,10 @@ export const signUp = async (email: string, password: string, profileData: Parti
 
     console.log('Auth user created:', authData.user.id);
 
-    // Wait a moment for the auth user to be fully created
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Verify the user is properly authenticated
+    if (!authData.session) {
+      console.log('No session created, user may need email confirmation');
+    }
 
     // Create the user profile
     const profileToInsert = {
@@ -188,13 +193,6 @@ export const signUp = async (email: string, password: string, profileData: Parti
 
     if (profileError) {
       console.error('Profile creation error:', profileError);
-      
-      // If profile creation fails, try to clean up the auth user
-      try {
-        await supabase.auth.admin.deleteUser(authData.user.id);
-      } catch (cleanupError) {
-        console.error('Failed to cleanup auth user:', cleanupError);
-      }
       
       throw new Error(`Failed to create user profile: ${profileError.message}`);
     }

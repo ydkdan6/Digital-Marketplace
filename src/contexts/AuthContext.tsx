@@ -37,6 +37,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log('AuthProvider: Initializing auth state');
     
+    // Clear any localStorage auth data to ensure we use database only
+    localStorage.removeItem('user');
+    localStorage.removeItem('userProfile');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('supabase.auth.token');
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
@@ -60,6 +66,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id || 'No user');
         
+        // Clear localStorage on any auth change to prevent conflicts
+        localStorage.removeItem('user');
+        localStorage.removeItem('userProfile');
+        localStorage.removeItem('authToken');
+        
         setUser(session?.user ?? null);
         
         if (session?.user) {
@@ -82,6 +93,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleSignOut = async () => {
     try {
       console.log('AuthProvider: Signing out');
+      
+      // Clear all localStorage data
+      localStorage.clear();
+      
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);

@@ -86,6 +86,11 @@ const AppContent: React.FC = () => {
 
   // Check URL for success/cancel pages
   useEffect(() => {
+    // Ensure we're not using any localStorage for auth
+    localStorage.removeItem('user');
+    localStorage.removeItem('userProfile');
+    localStorage.removeItem('authToken');
+    
     const urlParams = new URLSearchParams(window.location.search);
     const success = urlParams.get('success');
     const canceled = urlParams.get('canceled');
@@ -263,7 +268,7 @@ const AppContent: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRole('buyer')}
-                  className={`p-4 border-2 rounded-lg text-center transition-colors ₦{
+                  className={`p-4 border-2 rounded-lg text-center transition-colors ${
                     role === 'buyer'
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-200 hover:border-gray-300'
@@ -276,7 +281,7 @@ const AppContent: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setRole('seller')}
-                  className={`p-4 border-2 rounded-lg text-center transition-colors ₦{
+                  className={`p-4 border-2 rounded-lg text-center transition-colors ${
                     role === 'seller'
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-200 hover:border-gray-300'
@@ -482,7 +487,7 @@ const AppContent: React.FC = () => {
               <nav className="hidden md:flex items-center space-x-6">
                 <button
                   onClick={() => setState(prev => ({ ...prev, currentPage: 'home' }))}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ₦{
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     state.currentPage === 'home'
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-600 hover:text-gray-900'
@@ -494,7 +499,7 @@ const AppContent: React.FC = () => {
                 
                 <button
                   onClick={() => setState(prev => ({ ...prev, currentPage: 'premium' }))}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ₦{
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     state.currentPage === 'premium'
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-600 hover:text-gray-900'
@@ -508,7 +513,7 @@ const AppContent: React.FC = () => {
                   <>
                     <button
                       onClick={() => setState(prev => ({ ...prev, currentPage: 'cart' }))}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors relative ₦{
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
                         state.currentPage === 'cart'
                           ? 'bg-blue-100 text-blue-700'
                           : 'text-gray-600 hover:text-gray-900'
@@ -524,7 +529,7 @@ const AppContent: React.FC = () => {
                     </button>
                     <button
                       onClick={() => setState(prev => ({ ...prev, currentPage: 'orders' }))}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ₦{
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                         state.currentPage === 'orders'
                           ? 'bg-blue-100 text-blue-700'
                           : 'text-gray-600 hover:text-gray-900'
@@ -539,7 +544,7 @@ const AppContent: React.FC = () => {
                 {profile?.role === 'seller' && (
                   <button
                     onClick={() => setState(prev => ({ ...prev, currentPage: 'dashboard' }))}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ₦{
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       state.currentPage === 'dashboard'
                         ? 'bg-blue-100 text-blue-700'
                         : 'text-gray-600 hover:text-gray-900'
@@ -824,7 +829,7 @@ const AppContent: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-gray-900">₦{order.total_amount.toLocaleString()}</p>
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ₦{
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           order.status === 'delivered' ? 'bg-green-100 text-green-800' :
                           order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
                           order.status === 'confirmed' ? 'bg-yellow-100 text-yellow-800' :
@@ -859,7 +864,7 @@ const AppContent: React.FC = () => {
                         <p className="font-medium text-gray-900">
                           {order.currency.toUpperCase()} {(order.amount_total / 100).toFixed(2)}
                         </p>
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ₦{
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           order.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
