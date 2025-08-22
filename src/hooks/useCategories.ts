@@ -18,7 +18,7 @@ export const useCategories = () => {
           .order('name');
 
         if (fetchError) throw fetchError;
-
+        console.log("Fetched categories from Supabase:", data); 
         setCategories(data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch categories');

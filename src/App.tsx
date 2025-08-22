@@ -37,6 +37,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+import { SellerDashboard } from './components/SellerDashboard';
+
 // Load Montserrat font
 const fontLink = document.createElement('link');
 fontLink.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap';
@@ -565,7 +567,10 @@ const AppContent: React.FC = () => {
                     Welcome, {profile?.full_name}
                   </span>
                   <button
-                    onClick={signOut}
+                    onClick={() => {
+                      signOut();
+                      setState(prev => ({ ...prev, currentPage: 'login' }));
+                    }}
                     className="text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     <LogOut className="w-5 h-5" />
@@ -891,6 +896,11 @@ const AppContent: React.FC = () => {
     );
   };
 
+  // Seller Dashboard Page
+  const DashboardPage: React.FC = () => {
+    return <SellerDashboard />;
+  };
+
   // Render current page
   const renderCurrentPage = () => {
     if (authLoading) {
@@ -932,6 +942,8 @@ const AppContent: React.FC = () => {
         return <PremiumPage />;
       case 'orders':
         return <OrdersPage />;
+      case 'dashboard':
+        return <DashboardPage />;
       case 'login':
         return <LoginForm />;
       case 'register':
